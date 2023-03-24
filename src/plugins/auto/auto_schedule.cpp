@@ -249,9 +249,9 @@ void AutoSchedule::init(const ScheduleContext::Ptr& sContext) {
                       std::end(validDevices),
                       std::back_inserter(_autoSContext->_devicePriorities));
             // Total number of devices in CTPUT
-            _nCTputDeviceNums = validDevices.size();
+            auto nCTputDeviceNums = validDevices.size();
             // Generate contexts for loading each device
-            _pCTPUTLoadContext.reset(new AutoLoadContext[_nCTputDeviceNums]);
+            _pCTPUTLoadContext.reset(new AutoLoadContext[nCTputDeviceNums]);
             int idx = 0;
             DeviceInformation cpuDeviceInformation;
             for (auto& device : validDevices) {
@@ -388,12 +388,12 @@ void AutoSchedule::init(const ScheduleContext::Ptr& sContext) {
     std::vector<Task> otherDevicesloads;
     std::vector<Task> cpuLoads;
     if (_pCTPUTLoadContext) {
-        for (size_t i = 0; i < _nCTputDeviceNums; i++) {
+        for (size_t i = 0; i < _autoSContext->_devicePriorities.size(); i++) {
             auto* contextPtr = &_pCTPUTLoadContext[i];
             auto modelPath = _autoSContext->_modelPath;
             auto network = _autoSContext->_network;
             _pCTPUTLoadContext[i].task = std::bind(loadDeviceTask, contextPtr, modelPath, network, isCumulative);
-            if (i == _nCTputDeviceNums - 1 &&
+            if (i == _autoSContext->_devicePriorities.size() - 1 &&
                 _pCTPUTLoadContext[i].deviceInfo.deviceName.find("CPU") != std::string::npos) {
                 cpuLoads.push_back(_pCTPUTLoadContext[i].task);
             } else {
@@ -648,7 +648,7 @@ void AutoSchedule::WaitFirstNetworkReady() {
     // devices loaded successfully in CTPUT
     if (_pCTPUTLoadContext) {
         int nLoadSucNums = 0;
-        for (size_t i = 0; i < _nCTputDeviceNums; i++) {
+        for (size_t i = 0; i < _autoSContext->_devicePriorities.size(); i++) {
             // check if device loaded successfully
             if (_pCTPUTLoadContext[i].isAlready) {
                 nLoadSucNums++;

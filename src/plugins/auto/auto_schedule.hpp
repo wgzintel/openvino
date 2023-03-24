@@ -74,7 +74,6 @@ private:
     std::promise<void>                       _firstLoadPromise;
     bool                                     _exitFlag = {false};
     size_t                                   _cpuHelpInferCount = 0;
-    size_t                                   _nCTputDeviceNums = 0;
 };
 
 }  // namespace MultiDevicePlugin
