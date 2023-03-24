@@ -778,29 +778,11 @@ IInferPtr AutoSchedule::CreateInferRequest() {
         syncRequestImpl = CreateInferRequestImpl(execNetwork->_networkInputs, execNetwork->_networkOutputs);
     syncRequestImpl->setPointerToExecutableNetworkInternal(execNetwork);
     if (_passthroughExeNet) {
-        std::string perfmode;
-        try {
-            perfmode = _passthroughExeNet->GetConfig(
-                                CONFIG_KEY(PERFORMANCE_HINT)).as<std::string>();
-        } catch (const IE::Exception&) {
-            LOG_INFO("query perf hint from passthrough network failed");
-        }
-        if (_autoSContext->_batchingDisabled || perfmode != CONFIG_VALUE(THROUGHPUT)) {
-            syncRequestImpl->setPointerToSo(_passthroughExeNet._so);
-        } else {
-            auto so = _passthroughExeNet._ptr->GetPointerToSo();
-            // Get the _so from passthrough executable network when batch plugin is disable.
-            if (!so)
-                so = _passthroughExeNet._so;
-            syncRequestImpl->setPointerToSo(so);
-        }
-    } else if (std::static_pointer_cast<MultiDeviceInferRequest>(syncRequestImpl)->GetSharedRequest()) {
-        // cumulative case, load to MULTI:*
-        auto sharedMultiRequest = std::static_pointer_cast<MultiDeviceInferRequest>(syncRequestImpl)->GetSharedRequest();
-        if (sharedMultiRequest._ptr->getPointerToSo())
-            syncRequestImpl->setPointerToSo(sharedMultiRequest._ptr->getPointerToSo());
-        else
-            syncRequestImpl->setPointerToSo(sharedMultiRequest._so);
+        auto so = _passthroughExeNet._ptr->GetPointerToSo();
+        // Get the _so from passthrough executable network when batch plugin is disable.
+        if (!so)
+            so = _passthroughExeNet._so;
+        syncRequestImpl->setPointerToSo(so);
     }
     return std::make_shared<AsyncInferRequest>(shared_from_this(),
                                                syncRequestImpl,
