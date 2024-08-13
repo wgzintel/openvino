@@ -195,7 +195,7 @@ void ExecutionConfig::apply_debug_options(const cldnn::device_info& info) {
     }
 
     //GPU_DEBUG_IF(debug_config->enable_dynamic_quantize) {
-    std::cout << '[GPU] ********* set dq_group_size UINT64_MAX *********' << std::endl;
+    std::cout << "** set dq_group_size UINT64_MAX **" << std::endl;
     set_property(ov::hint::dynamic_quantization_group_size(UINT64_MAX));
     //}
 }
